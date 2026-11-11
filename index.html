@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>Рейтинг успеваемости · IThub</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23c6538c'/%3E%3Cpath d='M9 22v-6M16 22V10M23 22v-9' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<header class="top-bar">
+  <div class="bar-in">
+    <a class="brand" href="/" aria-label="IThub — рейтинг успеваемости">
+      <span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M6 19v-5M12 19V6M18 19v-9"/></svg></span>
+      <b>IThub</b><span class="sep"></span><span class="brand-sub">Рейтинг</span>
+    </a>
+    <div class="actions">
+      <button class="icon-btn" id="theme" aria-label="Сменить тему" title="Светлая / тёмная тема"></button>
+      <button class="icon-btn" id="settings" aria-label="Настройки рейтинга" title="Настройки рейтинга">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+      </button>
+      <button class="btn btn-text" id="demo">Демо</button>
+      <button class="btn btn-gray" id="reset">Очистить</button>
+      <button class="btn btn-main" data-open>Добавить аккаунт</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Рейтинг успеваемости</h1>
+    <p class="lead">Лучшие 30 учеников по баллам и посещаемости</p>
+  </section>
+
+  <div id="summary"></div>
+
+  <div id="toolbar" class="toolbar" hidden>
+    <div id="tabs" class="tabs" role="tablist" aria-label="Группы"></div>
+    <div class="tools">
+      <label class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="q" type="search" placeholder="Найти ученика или группу  ( / )" autocomplete="off" aria-label="Поиск">
+      </label>
+      <div class="seg" role="group" aria-label="Вид">
+        <button type="button" data-view="top" aria-pressed="true">Топ-30</button>
+        <button type="button" data-view="all" aria-pressed="false">Все ученики</button>
+      </div>
+      <details class="menu" id="menu">
+        <summary class="btn btn-gray">Экспорт</summary>
+        <div class="menu-list">
+          <button type="button" data-act="csv">Скачать таблицу (CSV)</button>
+          <button type="button" data-act="copy">Копировать топ-10 текстом</button>
+          <button type="button" data-act="print">Печать / сохранить в PDF</button>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div id="app"></div>
+</main>
+
+<footer class="foot"><div class="wrap">Данные загружаются с учебной платформы под твоим аккаунтом и хранятся только в этой вкладке браузера. Пароли не сохраняются.</div></footer>
+
+<!-- Вход -->
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <form id="form" autocomplete="on">
+    <div class="dlg-head"><h2 id="dlg-title">Добавить аккаунт</h2><button type="button" class="x" data-close aria-label="Закрыть">×</button></div>
+    <p class="dlg-text">Войди в аккаунт куратора, и его группы добавятся в рейтинг. Можно добавить несколько аккаунтов подряд.</p>
+    <label class="field">Email<input id="email" type="email" required autocomplete="username" placeholder="name@college.ru"></label>
+    <label class="field">Пароль<input id="pass" type="password" required autocomplete="current-password" placeholder="Пароль"></label>
+    <div id="err" role="alert"></div>
+    <div class="dlg-foot">
+      <button type="button" class="btn btn-gray" data-close>Отмена</button>
+      <button type="submit" class="btn btn-main" id="go">Загрузить группы</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Карточка ученика -->
+<dialog id="sdlg" aria-label="Подробности об ученике">
+  <div class="pad" id="sd-body"></div>
+</dialog>
+
+<!-- Настройки -->
+<dialog id="setdlg" aria-labelledby="set-title">
+  <div class="pad">
+    <div class="dlg-head"><h2 id="set-title">Формула рейтинга</h2><button type="button" class="x" data-close aria-label="Закрыть">×</button></div>
+    <p class="dlg-text">Выбери, насколько важны баллы и посещаемость. Рейтинг и места пересчитаются сразу.</p>
+    <div class="wrow"><span>Баллы</span><b id="wpv">70%</b></div>
+    <input id="wp" type="range" min="0" max="100" step="5" value="70" aria-label="Доля баллов в рейтинге">
+    <div class="wrow"><span>Посещаемость</span><b id="wav">30%</b></div>
+    <div class="dlg-foot">
+      <button type="button" class="btn btn-gray" id="wp-reset">Сбросить (70 / 30)</button>
+      <button type="button" class="btn btn-main" data-close>Готово</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
+EOF
